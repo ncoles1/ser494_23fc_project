@@ -1,6 +1,9 @@
-from pprint import pprint
+import os.path
+import time
 import requests
-import re
+import csv
+import wf_searchwords
+
 # SER 494 - Data Science MS3
 # Author: Nicolas Coles
 # Date: 10/10/2023
@@ -8,19 +11,19 @@ import re
 #               in order to find the main reasons for toxicity and hate in the game. Because I have not yet
 #               learned how to use machine learning, this will use a rudimentary way of classifying toxic posts.
 
+# Function to scrape Reddit posts (for different categories)
 
-def reddit_scrape(subreddit, after=''):
-    url_template = 'https://www.reddit.com/r/{}/top.json?t=all{}'
+
+def reddit_scrape(subreddit, category, after='', data_list=None):
+    url_template = 'https://www.reddit.com/r/{}/{}.json?{}'
     headers = {
         'User-Agent': 'NCCGaming'
     }
 
     params = f'&after={after}' if after else ''
 
-    toxic_keywords = ["complain", "teammates", "champion", "item", "balance", "broken"]
-
     while True:
-        url = url_template.format(subreddit, params)
+        url = url_template.format(subreddit, category, params)
         response = requests.get(url, headers=headers)
 
         if response.ok:
@@ -28,35 +31,71 @@ def reddit_scrape(subreddit, after=''):
             for post in data['children']:
                 post_data = post['data']
                 title = post_data['title']
-                author = post_data['author']
-                date = post_data['created_utc']
-                url = post_data.get('url')
-                upvotes = post_data['score']
                 content = post_data['selftext']
 
-                print(f'Title: {title}')
-                print(f'Author: {author}')
-                print(f'Date: {date}')
-                print(f'Upvotes: {upvotes}')
-                print(f'URL: {url}')
-                print('---------------------')
+                # Check if any keywords are present in the title or content
+                if any(keyword in title.lower() or keyword in content.lower()
+                       for keyword in wf_searchwords.search_words):
+                    author = post_data['author']
+                    date = post_data['created_utc']
+                    url = post_data.get('url')
+                    upvotes = post_data['score']
+
+                    data_list.append({
+                        'Category': category,
+                        'Title': title,
+                        'Content': content,
+                        'Author': author,
+                        'Date': date,
+                        'Upvotes': upvotes,
+                        'URL': url
+                    })
+
+                    print(f'Category: {category}')
+                    print(f'Title: {title}')
+                    print(f'Author: {author}')
+                    print(f'Date: {date}')
+                    print(f'Upvotes: {upvotes}')
+                    print(f'URL: {url}')
+                    print('---------------------')
             return data['after']
+
+        elif response.status_code == 429:
+            print("Max limit reached, waiting one minute...")
+            time.sleep(60)
+            continue
         else:
             print(f'Error {response.status_code}')
             return None
 
+# Function to save data to a CSV file
+
+
+def save_to_csv(data_list):
+    csv_path = os.path.join('data_original', 'reddit_data.csv')
+    with open(csv_path, 'w', newline='', encoding='utf-8') as csv_file:
+        fieldnames = ['Category', 'Title', 'Content', 'Author', 'Date', 'Upvotes', 'URL']
+        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+        writer.writeheader()
+
+        for data in data_list:
+            writer.writerow(data)
+        print('Data has been saved to data_original')
+
 
 def main():
     subreddit = 'leagueoflegends'
-    after = ''
-    while True:
-        after = reddit_scrape(subreddit, after)
-        if not after:
-            break  # Stop if end is reached
+    categories = ['new', 'hot', 'top']
+    data_list = []
+
+    for category in categories:
+        after = ''
+        while True:
+            after = reddit_scrape(subreddit, category, after, data_list)
+            if not after:
+                break  # Stop if end
+
+    save_to_csv(data_list)
 
 
-if __name__ == '__main__':
-    try:
-        main()
-    except KeyboardInterrupt:
-        print('Finished')
+
