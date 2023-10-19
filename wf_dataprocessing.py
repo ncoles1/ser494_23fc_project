@@ -1,3 +1,5 @@
+import datetime
+
 import pandas as pd
 import wf_searchwords
 import re
@@ -9,28 +11,33 @@ categories = {
         "weight": 2
     },
     "Champion Design": {
-        "keywords": ["redesign", "rework", "kit", "permaban", "nerf", "buff", "op", "overpowered", "underpowered", "unbalanced", "winrate",
-                     "win rate", "ban rate", "unplayable", "counterplay", "meta champ"],
+        "keywords": ["redesign", "rework", "kit", "permaban", "nerf", "buff", "op", "overpowered", "underpowered",
+                     "unbalanced", "winrate", "win rate", "ban rate", "unplayable", "counterplay", "meta champ",
+                     "champion balance", "champion design", "champion rework"],
         "weight": 2
     },
     "Game Balance": {
-        "keywords": ["lane", "balance", "overpowered", "underpowered", "item", "mythic"],
+        "keywords": ["lane", "balance", "overpowered", "underpowered", "item", "mythic", "jungle", "top", "bot",
+                     "mid", "adc", "sup"],
         "weight": 1
     },
-    "Losing Streaks" : {
-        "keywords": ["losing streak", "keep losing", "frustrated", "frustration"],
+    "Losing Streaks": {
+        "keywords": ["losing streak", "keep losing", "frustrated", "frustration", "losing games",
+                     "losing streak", "losers queue", "losing"],
         "weight": 1
     },
     "Ranked Pressure": {
-        "keywords": ["elo hell", "low elo", "lp", "elo", "rank up", "lp gain", "lp loss", "win", "mmr"],
-        "weight": 3
+        "keywords": ["elo hell", "low elo", "lp", "rank up", "lp gain", "lp loss", "win",
+                     "mmr", "hardstuck", "stuck"],
+        "weight": 2
     },
     "Toxicity from Others": {
-        "keywords": ["toxic teammate", "toxicity", "toxic", "flaming"],
+        "keywords": ["toxic teammate", "toxicity", "toxic", "flaming", "report", "toxic players", "mute", "abuse",
+                     "harrasment", "harass", "negative attitude", "raging", "insult"],
         "weight": 2
     },
     "Communication Issues": {
-        "keywords": ["communication", "coordination", "listen"],
+        "keywords": ["communication", "coordination", "listen", "voice chat", "ping", "no comm", "shotcall"],
         "weight": 1
     }
 }
@@ -42,9 +49,11 @@ df['Content'].fillna('', inplace=True)
 df['Content'] = df['Content'].str.lower()
 df['Title'] = df['Title'].str.lower()
 
-# Remove punctuation from content and title
+# Remove punctuation from content and title, change date from seconds to datetime format.
 df['Content'] = df['Content'].apply(lambda x: re.sub(r'[^\w\s]', '', x))
 df['Title'] = df['Title'].apply(lambda x: re.sub(r'[^\w\s]', '', x))
+df['Date'] = df['Date'].apply(lambda timestamp: datetime.datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S'))
+
 
 # Create a dictionary to store category counts
 category_counts = {category: 0 for category in categories}
@@ -69,11 +78,11 @@ def categorize_post(row):
     return post_category
 
 
-df['Category'] = df.apply(categorize_post, axis=1)
+def main():
+    df['Category'] = df.apply(categorize_post, axis=1)
 
-# Save categorized data to a new CSV
-categorized_csv_path = 'data_original/categorized_reddit_data.csv'
-df.to_csv(categorized_csv_path, index=False)
+    categorized_csv_path = 'data_processed/categorized_reddit_data.csv'
+    df.to_csv(categorized_csv_path, index=False)
 
-for category, count in category_counts.items():
-    print(f"{category}: {count} posts")
+    for category, count in category_counts.items():
+        print(f"{category}: {count} posts")

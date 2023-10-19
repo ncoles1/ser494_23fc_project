@@ -20,16 +20,25 @@ def reddit_scrape(subreddit, category, after='', data_list=None):
         'User-Agent': 'NCCGaming'
     }
 
-    params = f'&after={after}' if after else ''
+    params = ''
+    if category == 'top':
+        params += '/?t=all/'
+    params += f'&after={after}' if after else ''
 
     while True:
         url = url_template.format(subreddit, category, params)
         response = requests.get(url, headers=headers)
 
         if response.ok:
-            data = response.json()['data']
+            try:
+                data = response.json()['data']
+            except requests.exceptions.JSONDecodeError as e:
+                print("JSON error: {e}")
+                continue
+
             for post in data['children']:
                 post_data = post['data']
+
                 title = post_data['title']
                 content = post_data['selftext']
 
@@ -40,6 +49,7 @@ def reddit_scrape(subreddit, category, after='', data_list=None):
                     date = post_data['created_utc']
                     url = post_data.get('url')
                     upvotes = post_data['score']
+                    num_comments = post_data['num_comments']
 
                     data_list.append({
                         'Category': category,
@@ -48,6 +58,7 @@ def reddit_scrape(subreddit, category, after='', data_list=None):
                         'Author': author,
                         'Date': date,
                         'Upvotes': upvotes,
+                        'Comment_Count': num_comments,
                         'URL': url
                     })
 
@@ -56,6 +67,7 @@ def reddit_scrape(subreddit, category, after='', data_list=None):
                     print(f'Author: {author}')
                     print(f'Date: {date}')
                     print(f'Upvotes: {upvotes}')
+                    print(f'Comment Count {num_comments}')
                     print(f'URL: {url}')
                     print('---------------------')
             return data['after']
@@ -68,13 +80,12 @@ def reddit_scrape(subreddit, category, after='', data_list=None):
             print(f'Error {response.status_code}')
             return None
 
+
 # Function to save data to a CSV file
-
-
 def save_to_csv(data_list):
     csv_path = os.path.join('data_original', 'reddit_data.csv')
     with open(csv_path, 'w', newline='', encoding='utf-8') as csv_file:
-        fieldnames = ['Category', 'Title', 'Content', 'Author', 'Date', 'Upvotes', 'URL']
+        fieldnames = ['Category', 'Title', 'Content', 'Author', 'Date', 'Upvotes', 'Comment_Count', 'URL']
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         writer.writeheader()
 
@@ -93,7 +104,7 @@ def main():
         while True:
             after = reddit_scrape(subreddit, category, after, data_list)
             if not after:
-                break  # Stop if end
+                break
 
     save_to_csv(data_list)
 
