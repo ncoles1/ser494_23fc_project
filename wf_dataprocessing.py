@@ -42,18 +42,6 @@ categories = {
     }
 }
 
-csv_path = 'data_original/reddit_data.csv'
-df = pd.read_csv(csv_path)
-
-df['Content'].fillna('', inplace=True)
-df['Content'] = df['Content'].str.lower()
-df['Title'] = df['Title'].str.lower()
-
-# Remove punctuation from content and title, change date from seconds to datetime format.
-df['Content'] = df['Content'].apply(lambda x: re.sub(r'[^\w\s]', '', x))
-df['Title'] = df['Title'].apply(lambda x: re.sub(r'[^\w\s]', '', x))
-df['Date'] = df['Date'].apply(lambda timestamp: datetime.datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S'))
-
 
 # Create a dictionary to store category counts
 category_counts = {category: 0 for category in categories}
@@ -79,6 +67,19 @@ def categorize_post(row):
 
 
 def main():
+    csv_path = 'data_original/reddit_data.csv'
+    df = pd.read_csv(csv_path)
+
+    df['Content'].fillna('', inplace=True)
+    df['Content'] = df['Content'].str.lower()
+    df['Title'] = df['Title'].str.lower()
+
+    # Remove punctuation from content and title, change date from seconds to datetime format.
+    df['Content'] = df['Content'].apply(lambda x: re.sub(r'[^\w\s]', '', x))
+    df['Title'] = df['Title'].apply(lambda x: re.sub(r'[^\w\s]', '', x))
+    df['Date'] = df['Date'].apply(
+        lambda timestamp: datetime.datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S'))
+
     df['Category'] = df.apply(categorize_post, axis=1)
 
     categorized_csv_path = 'data_processed/categorized_reddit_data.csv'
