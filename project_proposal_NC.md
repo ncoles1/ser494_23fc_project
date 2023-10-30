@@ -14,7 +14,7 @@ Data Sourcing: The data will be produced by gathering posts from the Reddit subr
 Background Knowledge: 
 1. Absolute Beginner’s Guide to League of Legends (https://mobalytics.gg/blog/absolute-beginners-guide-to-league-of-legends/) Retrieved 9/11/2023
 2. Flaming and Gaming – Computer-mediated communication and toxic disinhibition (http://essay.utwente.nl/62350/1/Elliott%2C_T.P._-_s0157090_%28verslag%29.pdf) Retrieved 9/11/2023
-3. How League Of Legends Enables Toxicity (https://kotaku.com/how-league-of-legends-enables-toxicity-1693572469) Retrieced 9/11/2023
+3. How League Of Legends Enables Toxicity (https://kotaku.com/how-league-of-legends-enables-toxicity-1693572469) Retrieved 9/11/2023
 
 Related Work: 
 1. Toxic Behaviors in Team-Based Competitive Gaming: The Case of League of Legends (https://dl.acm.org/doi/abs/10.1145/3410404.3414243) Retrieved 9/11/2023
