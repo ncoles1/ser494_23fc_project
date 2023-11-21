@@ -1,0 +1,11 @@
+Feature	Min	Max	Median	Number of Categories: 	Most Frequent Category: 	Least Frequent Category: 
+Upvotes	0	6437	0.0			
+Date	2023-10-13 20:35:30	2023-10-19 01:21:43	2023-10-13 23:30:12			
+Toxicity Category	N/A	N/A	N/A	7.0	Bad Teammates	Toxicity from Others
+Comment_Count	0	3231	7.0			
+Keywords	0.0	2171.0	86.94252873563218			
+
+                Upvotes  Comment_Count      Date
+Upvotes        1.000000       0.443384 -0.088715
+Comment_Count  0.443384       1.000000 -0.139014
+Date          -0.088715      -0.139014  1.000000
