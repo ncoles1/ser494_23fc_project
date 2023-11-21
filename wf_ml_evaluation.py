@@ -13,14 +13,9 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 
 def load_and_split(file_path):
     df = pd.read_csv(file_path)
-
-    # Combine 'Title' and 'Content' to form the input text for classification
     df['Text'] = df['Content'].fillna('')
-
-    # Splitting the data into train and test sets
     X_train, X_test, y_train, y_test = train_test_split(df['Text'], df['Category'], test_size=0.2, random_state=42)
 
-    # Saving the split datasets
     train_data = pd.DataFrame({'Text': X_train, 'Category': y_train})
     test_data = pd.DataFrame({'Text': X_test, 'Category': y_test})
 
@@ -34,7 +29,6 @@ def vectorize_text(x_train, x_test):
     x_train_tfidf = tfidf.fit_transform(x_train)
     x_test_tfidf = tfidf.transform(x_test)
 
-    # Save the vectorizer along with the model
     vectorizer_file = os.path.join('models', 'vectorizer.pkl')
     joblib.dump(tfidf, vectorizer_file)
 
